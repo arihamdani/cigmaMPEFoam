@@ -1,0 +1,9 @@
+phaseTurbulenceStabilisation/phaseTurbulenceStabilisation.C
+
+wallPhaseChange/wallPhaseChange.C
+wallPhaseChange/alphatPhaseChangeWallFunctionFvPatchScalarField.C
+
+wallCondensation/wallCondensation.C
+wallCondensation/wallCondensationPhaseChangeRateFvPatchScalarField.C
+
+LIB = $(FOAM_USER_LIBBIN)/libcigmaMPECondensationModels

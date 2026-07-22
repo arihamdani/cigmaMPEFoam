@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${WM_PROJECT_VERSION:-}" != "14" ]]; then
+    echo "ERROR: source OpenFOAM Foundation v14 before building cigmaMPEFoam." >&2
+    exit 1
+fi
+
+project_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+"$project_dir/Allclean"
+
+echo "Building cigmaMPEFoam condensation models"
+wmake libso "$project_dir/src/condensationModels"
+
+echo "Building cigmaMPEFluid"
+wmake libso "$project_dir/applications/solvers/fluid/cigmaMPEFluid"
+
+echo "Building cigmaMPESolid"
+wmake libso "$project_dir/applications/solvers/solid/cigmaMPESolid"
+
+echo "Built cigmaMPEFoam for OpenFOAM-${WM_PROJECT_VERSION}"

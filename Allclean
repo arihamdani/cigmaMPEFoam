@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+project_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+wclean libso "$project_dir/applications/solvers/solid/cigmaMPESolid"
+wclean libso "$project_dir/applications/solvers/fluid/cigmaMPEFluid"
+wclean libso "$project_dir/src/condensationModels"
+
+if [[ -n "${FOAM_USER_LIBBIN:-}" ]]; then
+    for library in \
+        libcigmaMPECondensationModels.so \
+        libcigmaMPEFluidSolver.so \
+        libcigmaMPESolidSolver.so
+    do
+        library_path="$FOAM_USER_LIBBIN/$library"
+        if [[ -f "$library_path" ]]; then
+            unlink -- "$library_path"
+        fi
+    done
+fi
+
+echo "Cleaned cigmaMPEFoam"

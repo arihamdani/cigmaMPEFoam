@@ -1,0 +1,23 @@
+# OpenFOAM build output
+platforms/
+lnInclude/
+Make/linux*/
+*.o
+*.so
+*.dep
+
+# OpenFOAM case output
+processor*/
+postProcessing/
+VTK/
+dynamicCode/
+log.*
+*.log
+core
+core.*
+
+# Editor and operating-system files
+*.swp
+*~
+.DS_Store
+Thumbs.db
