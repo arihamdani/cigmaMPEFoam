@@ -6,4 +6,6 @@ wallPhaseChange/alphatPhaseChangeWallFunctionFvPatchScalarField.C
 wallCondensation/wallCondensation.C
 wallCondensation/wallCondensationPhaseChangeRateFvPatchScalarField.C
 
+timeVaryingExternalWallLayersHeatTransferCoefficient/timeVaryingExternalWallLayersHeatTransferCoefficient_DimensionedFieldFunction.C
+
 LIB = $(FOAM_USER_LIBBIN)/libcigmaMPECondensationModels

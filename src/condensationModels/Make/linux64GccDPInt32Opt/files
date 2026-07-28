@@ -1,0 +1,11 @@
+SOURCE += phaseTurbulenceStabilisation/phaseTurbulenceStabilisation.C
+
+SOURCE += wallPhaseChange/wallPhaseChange.C
+SOURCE += wallPhaseChange/alphatPhaseChangeWallFunctionFvPatchScalarField.C
+
+SOURCE += wallCondensation/wallCondensation.C
+SOURCE += wallCondensation/wallCondensationPhaseChangeRateFvPatchScalarField.C
+
+SOURCE += timeVaryingExternalWallLayersHeatTransferCoefficient/timeVaryingExternalWallLayersHeatTransferCoefficient_DimensionedFieldFunction.C
+
+LIB = $(FOAM_USER_LIBBIN)/libcigmaMPECondensationModels
