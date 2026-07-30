@@ -43,11 +43,17 @@ by the CIGMA wall-condensation case:
 - `wallPhaseChange` and the `alphatPhaseChangeWallFunction` patch field;
 - `phaseTurbulenceStabilisation`, which is also selected by the case.
 
-These files are unchanged copies of the OpenFOAM Foundation v14 sources. The
-runtime type names, equations, correlations, coefficients, and dictionary
-interfaces are therefore unchanged. The selected `ArdenBuck` saturation
-pressure model remains supplied by the standard OpenFOAM v14 saturation-model
-library and is not duplicated here.
+These three model groups are unchanged copies of the OpenFOAM Foundation v14
+sources. Their runtime type names, equations, correlations, coefficients, and
+dictionary interfaces are therefore unchanged. The selected `ArdenBuck`
+saturation-pressure model remains supplied by the standard OpenFOAM v14
+saturation-model library and is not duplicated here.
+
+The library also contains
+`timeVaryingExternalWallLayersHeatTransferCoefficient`, an optional boundary
+utility that places conductive wall layers in series with a time-varying
+external heat-transfer coefficient supplied as a `Function1`. This utility
+does not modify the baseline wall-condensation closure.
 
 The library is installed as `libcigmaMPECondensationModels.so`. A case using
 this library should not also load `libmultiphaseEulerFvModels.so` for these same
@@ -88,3 +94,22 @@ regionSolvers
 
 This baseline intentionally changes only module ownership and library loading;
 it does not change condensation physics or CHT configuration.
+
+## Baseline regression
+
+The model equations, sign conventions, dimensions, and conservation targets
+are defined in [`MODEL_DESIGN.md`](MODEL_DESIGN.md).
+
+After sourcing OpenFOAM Foundation v14, run the standard-versus-modular
+one-step regression test with:
+
+```sh
+./tests/run_baseline_regression.sh
+```
+
+The test copies only the initial and configuration directories to a temporary
+location. It does not modify simulation results in either source case. Set
+`KEEP_TEST_CASES=1` to retain the temporary cases and logs for inspection.
+
+The reference environment and the remaining long-run validation requirements
+are recorded in [`tests/BASELINE_MANIFEST.md`](tests/BASELINE_MANIFEST.md).

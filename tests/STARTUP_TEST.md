@@ -1,5 +1,11 @@
 # Modular startup test
 
+The historical 2026-07-22 result below established the first modular
+baseline. It is now automated by `run_baseline_regression.sh` and was repeated
+successfully on 2026-07-30. See `BASELINE_MANIFEST.md` for the current build
+checksums, regression hash, resource smoke metrics, and pending validation
+requirements.
+
 Date: 2026-07-22  
 OpenFOAM: Foundation v14, build `14-0db507470b5e`
 
