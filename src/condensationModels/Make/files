@@ -1,5 +1,7 @@
 phaseTurbulenceStabilisation/phaseTurbulenceStabilisation.C
 
+massDiffusionLimitedPhaseChange/massDiffusionLimitedPhaseChange.C
+
 wallPhaseChange/wallPhaseChange.C
 wallPhaseChange/alphatPhaseChangeWallFunctionFvPatchScalarField.C
 

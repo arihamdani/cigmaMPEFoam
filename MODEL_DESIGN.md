@@ -9,10 +9,11 @@ OpenFOAM commit `0db507470b`.
 
 The fluid and solid solver modules are deliberately thin subclasses. They
 inherit the equations and solution sequence of `multiphaseEuler` and `solid`,
-respectively. The copied `phaseTurbulenceStabilisation`, `wallPhaseChange`, and
-`wallCondensation` sources are identical to the corresponding OpenFOAM v14
-sources. The time-varying external heat-transfer-coefficient model is an
-additional boundary utility and does not alter the condensation closure.
+respectively. The copied `phaseTurbulenceStabilisation`,
+`massDiffusionLimitedPhaseChange`, `wallPhaseChange`, and `wallCondensation`
+sources are identical to the corresponding OpenFOAM v14 sources. The
+time-varying external heat-transfer-coefficient model is an additional
+boundary utility and does not alter the condensation closure.
 
 Future model development must preserve runtime selection of the baseline
 implementation so that every extension can be compared with an unchanged

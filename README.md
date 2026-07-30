@@ -37,13 +37,15 @@ The modules are installed as `libcigmaMPEFluidSolver.so` and
 ## Condensation models
 
 `src/condensationModels` contains the minimum OpenFOAM v14 source set required
-by the CIGMA wall-condensation case:
+by the CIGMA and CONAN wall-condensation cases:
 
 - `wallCondensation` and its phase-change-rate patch field;
 - `wallPhaseChange` and the `alphatPhaseChangeWallFunction` patch field;
-- `phaseTurbulenceStabilisation`, which is also selected by the case.
+- `phaseTurbulenceStabilisation`, which is also selected by the case;
+- `massDiffusionLimitedPhaseChange`, required by the OpenFOAM v14 CONAN
+  validation tutorial.
 
-These three model groups are unchanged copies of the OpenFOAM Foundation v14
+These four model groups are unchanged copies of the OpenFOAM Foundation v14
 sources. Their runtime type names, equations, correlations, coefficients, and
 dictionary interfaces are therefore unchanged. The selected `ArdenBuck`
 saturation-pressure model remains supplied by the standard OpenFOAM v14

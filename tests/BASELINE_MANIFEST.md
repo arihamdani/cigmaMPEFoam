@@ -30,12 +30,14 @@ Modular:  CCSJ01_cigmaMPE_wallCondensation_CHT
 `./Allwmake` completed successfully. The rebuilt library checksums were:
 
 ```text
-189daf3afdd35ae6f4c1670af4bf46f27974df32913f582286c1203fd611e341  libcigmaMPECondensationModels.so
+e924bb678a4ffb837a5240fda44602b2be5f05afd1bdf06ffb6264c3f19dffa6  libcigmaMPECondensationModels.so
 fb4c3a2a1e674f186697f9847c87b6fb3188e6e8a0a05c60cebd41608b7b74c3  libcigmaMPEFluidSolver.so
 4f990bd8298d14fdb1242bff1f4129db27fa561b8de01b459fe88a3cab478a2f  libcigmaMPESolidSolver.so
 ```
 
-These hashes matched the previously installed libraries.
+The condensation-library hash changed when the unchanged OpenFOAM v14
+`massDiffusionLimitedPhaseChange` source was added for the CONAN validation
+case. The fluid- and solid-solver hashes remained unchanged.
 
 ## One-step regression result
 
@@ -80,6 +82,7 @@ OpenFOAM v14 source tree:
 
 ```text
 phaseTurbulenceStabilisation
+massDiffusionLimitedPhaseChange
 wallPhaseChange
 wallCondensation
 ```
