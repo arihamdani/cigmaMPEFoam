@@ -25,6 +25,7 @@ License
 
 #include "cigmaMPEFluid.H"
 #include "addToRunTimeSelectionTable.H"
+#include "fvcSurfaceIntegrate.H"
 
 namespace Foam
 {
@@ -42,5 +43,69 @@ Foam::solvers::cigmaMPEFluid::cigmaMPEFluid(fvMesh& mesh)
 
 Foam::solvers::cigmaMPEFluid::~cigmaMPEFluid()
 {}
+
+
+Foam::scalar Foam::solvers::cigmaMPEFluid::maxDeltaT() const
+{
+    scalar deltaT = basicFluidSolver::maxDeltaT();
+
+    const dictionary& controlDict = runTime.controlDict();
+
+    if (!controlDict.found("phaseMaxCo"))
+    {
+        return deltaT;
+    }
+
+    const dictionary& phaseMaxCoDict = controlDict.subDict("phaseMaxCo");
+
+    Info<< "Phase Courant numbers and limits:";
+
+    forAll(movingPhases_, phasei)
+    {
+        const phaseModel& phase = movingPhases_[phasei];
+
+        if (!phaseMaxCoDict.found(phase.name()))
+        {
+            continue;
+        }
+
+        const scalar maxPhaseCo =
+            phaseMaxCoDict.lookup<scalar>(phase.name());
+
+        if (maxPhaseCo <= 0)
+        {
+            FatalIOErrorInFunction(phaseMaxCoDict)
+                << "The Courant-number limit for phase " << phase.name()
+                << " must be greater than zero, but is " << maxPhaseCo
+                << exit(FatalIOError);
+        }
+
+        const scalarField sumPhi
+        (
+            fvc::surfaceSum(mag(phase.phi()))().primitiveField()
+        );
+
+        const scalar phaseCo =
+            0.5
+           *gMax(sumPhi/mesh.V().primitiveField())
+           *runTime.deltaTValue();
+
+        Info<< ' ' << phase.name() << '=' << phaseCo
+            << " (limit " << maxPhaseCo << ')';
+
+        if (phaseCo > small)
+        {
+            deltaT = min
+            (
+                deltaT,
+                maxPhaseCo/phaseCo*runTime.deltaTValue()
+            );
+        }
+    }
+
+    Info<< endl;
+
+    return deltaT;
+}
 
 // ************************************************************************* //

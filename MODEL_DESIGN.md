@@ -134,6 +134,35 @@ and must not be tuned after examining the new-model results.
 8. Model changes are accepted only after build, startup, regression,
    conservation, mesh, time-step, and MPI checks.
 
+### 5.1 Phase-specific Courant-number limiter
+
+For each configured moving phase `i`, `cigmaMPEFluid` evaluates
+
+```text
+Co_i = 0.5 deltaT max_cells(sum_faces(abs(phi_i))/V).
+```
+
+The phase-specific time-step candidate is
+
+```text
+deltaT_i = maxCo_i/Co_i deltaT.
+```
+
+The applied time-step is the minimum of the standard OpenFOAM global
+time-step limit and every configured `deltaT_i`. The optional control is
+
+```text
+phaseMaxCo
+{
+    gas     5;
+    liquid  1;
+}
+```
+
+If `phaseMaxCo` is absent, the implementation returns the unmodified standard
+OpenFOAM v14 `basicFluidSolver::maxDeltaT()` result. This disabled-state
+behaviour is protected by the baseline regression test.
+
 ## 6. Regression invariants
 
 The one-step standard-versus-modular regression test must satisfy all of the

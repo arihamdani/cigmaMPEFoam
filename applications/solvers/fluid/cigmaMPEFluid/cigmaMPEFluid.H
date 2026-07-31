@@ -25,9 +25,9 @@ Class
     Foam::solvers::cigmaMPEFluid
 
 Description
-    Runtime-selectable cigmaMPEFoam fluid module. The initial implementation
-    inherits the OpenFOAM Foundation v14 multiphaseEuler solver without
-    overriding any equation or solution-stage method.
+    Runtime-selectable cigmaMPEFoam fluid module derived from the OpenFOAM
+    Foundation v14 multiphaseEuler solver. It optionally applies per-phase
+    Courant-number limits in addition to the standard global limit.
 
 \*---------------------------------------------------------------------------*/
 
@@ -57,6 +57,9 @@ public:
 
     //- Destructor
     virtual ~cigmaMPEFluid();
+
+    //- Return the maximum time-step including optional per-phase Co limits
+    virtual scalar maxDeltaT() const;
 
     //- Disallow assignment
     void operator=(const cigmaMPEFluid&) = delete;

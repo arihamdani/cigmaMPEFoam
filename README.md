@@ -23,8 +23,8 @@ cigmaMPEFoam/
 ## Solver modules
 
 `cigmaMPEFluid` is a runtime-selectable subclass of the standard v14
-`Foam::solvers::multiphaseEuler` module. It initially overrides no equations or
-solution-stage methods.
+`Foam::solvers::multiphaseEuler` module. It retains the standard equations and
+solution stages and adds an optional phase-specific Courant-number limiter.
 
 `cigmaMPESolid` is a runtime-selectable subclass of the standard v14
 `Foam::solvers::solid` module. It initially overrides no equations or
@@ -33,6 +33,28 @@ solution-stage methods.
 The modules are installed as `libcigmaMPEFluidSolver.so` and
 `libcigmaMPESolidSolver.so`. Their names follow the
 `lib<solverName>Solver.so` convention used automatically by `foamMultiRun`.
+
+## Phase-specific Courant-number limits
+
+`cigmaMPEFluid` supports optional per-phase Courant-number limits for
+transient calculations. The standard global `maxCo` remains active and is
+used as the fallback for cases without `phaseMaxCo`.
+
+```text
+adjustTimeStep  yes;
+maxCo           5;
+maxDeltaT       0.01;
+
+phaseMaxCo
+{
+    gas         5;
+    liquid      1;
+}
+```
+
+The applied time-step is the minimum allowed by the global limit, all listed
+moving-phase limits, `maxDeltaT`, function objects, and fvModels. Cases that
+do not define `phaseMaxCo` retain the standard OpenFOAM v14 behaviour.
 
 ## Condensation models
 
