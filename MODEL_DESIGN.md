@@ -163,6 +163,45 @@ If `phaseMaxCo` is absent, the implementation returns the unmodified standard
 OpenFOAM v14 `basicFluidSolver::maxDeltaT()` result. This disabled-state
 behaviour is protected by the baseline regression test.
 
+### 5.2 Single-phase diffusion-layer path
+
+`cigmaSinglePhaseFluid` inherits the native OpenFOAM v14
+`multicomponentFluid` equations. With wall condensation disabled, it must
+remain field-identical to that module.
+
+For an active `saturatedSteam` wall, the adjacent-cell H2O partial pressure is
+compared with the saturation pressure evaluated at the wall temperature. The
+boundary condition switches between zero gradient and the saturated H2O mass
+fraction. The wall mass flux is then
+
+```text
+jH2O = native v14 effective diffusive H2O flux [kg/m2/s]
+mDotWall = -max(jH2O, 0)/max(1 - YH2O, small) [kg/m2/s]
+```
+
+Thus `mDotWall < 0` denotes mass leaving the gas. The corresponding normal
+suction velocity and positive wall-directed latent heat flux are
+
+```text
+uSuction = -mDotWall/rho
+qCond = -mDotWall hLatent(Twall).
+```
+
+The same `mDotWall` must be used by the velocity boundary condition and the
+`massTransferRate` diagnostic. The polynomial latent-heat defaults are the
+containmentFOAM coefficients. Saturation pressure is selected through the
+native v14 `saturationPressureModel` interface.
+
+For an external-temperature thermal boundary, the
+`externalCondensationTemperature` condition adds the positive `qCond` field
+to the native OpenFOAM v14 wall heat balance. Both diagnostic fields retain
+their surface-flux dimensions: `massTransferRate` is `[kg/m2/s]` and `qcond`
+is `[W/m2]` on the condensing patch.
+
+This path intentionally does not allocate or solve liquid volume fraction,
+liquid momentum, or liquid energy equations. The expected resource advantage
+must be measured rather than assumed in the SETCOM validation campaign.
+
 ## 6. Regression invariants
 
 The one-step standard-versus-modular regression test must satisfy all of the

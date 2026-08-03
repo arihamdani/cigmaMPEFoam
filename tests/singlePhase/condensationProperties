@@ -1,0 +1,31 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  14
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      condensationProperties;
+}
+
+solveWallCondensation   yes;
+wallCondensationModel   diffusionLayer;
+condensingSpecie        H2O;
+maxCondWallMassFlux     100;
+
+saturationPressure
+{
+    type    ArdenBuck;
+}
+
+latentHeatModel
+{
+    type    polynomial;
+}
+
+// ************************************************************************* //

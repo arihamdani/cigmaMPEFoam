@@ -1,0 +1,6 @@
+cigmaDiffusionLayerCondensation.C
+cigmaSaturatedSteamFvPatchScalarField.C
+cigmaCondensingWallVelocityFvPatchVectorField.C
+cigmaExternalCondensationTemperatureFvPatchScalarField.C
+
+LIB = $(FOAM_USER_LIBBIN)/libcigmaSinglePhaseCondensationModels

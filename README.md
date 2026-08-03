@@ -10,11 +10,13 @@ cigmaMPEFoam/
 ├── applications/
 │   └── solvers/
 │       ├── fluid/
-│       │   └── cigmaMPEFluid/
+│       │   ├── cigmaMPEFluid/
+│       │   └── cigmaSinglePhaseFluid/
 │       └── solid/
 │           └── cigmaMPESolid/
 ├── src/
-│   └── condensationModels/
+│   ├── condensationModels/
+│   └── singlePhaseCondensation/
 ├── Allwmake
 ├── Allclean
 └── README.md
@@ -30,8 +32,14 @@ solution stages and adds an optional phase-specific Courant-number limiter.
 `Foam::solvers::solid` module. It initially overrides no equations or
 solution-stage methods.
 
-The modules are installed as `libcigmaMPEFluidSolver.so` and
-`libcigmaMPESolidSolver.so`. Their names follow the
+`cigmaSinglePhaseFluid` is a runtime-selectable subclass of the standard v14
+`Foam::solvers::multicomponentFluid` module. It solves one gas momentum,
+pressure and energy system with multicomponent species transport. When no
+`constant/condensationProperties` dictionary is present, its solved fields are
+identical to the native module in the one-step regression test.
+
+The modules are installed as `libcigmaMPEFluidSolver.so`,
+`libcigmaSinglePhaseFluidSolver.so` and `libcigmaMPESolidSolver.so`. Their names follow the
 `lib<solverName>Solver.so` convention used automatically by `foamMultiRun`.
 
 ## Phase-specific Courant-number limits
@@ -83,6 +91,73 @@ The library is installed as `libcigmaMPECondensationModels.so`. A case using
 this library should not also load `libmultiphaseEulerFvModels.so` for these same
 types, because duplicate runtime-selection registrations are unnecessary.
 
+## Single-phase diffusion-layer wall condensation
+
+`src/singlePhaseCondensation` adapts the containmentFOAM single-phase
+diffusion-layer formulation and its `saturatedSteam` and
+`condensingWallVelocity` boundary conditions to OpenFOAM Foundation v14.
+The implementation uses the native v14 effective species flux returned by the
+selected multicomponent thermophysical-transport model. This includes the
+molecular and turbulent contributions configured by that model.
+
+Select the solver in `system/controlDict`:
+
+```text
+solver  cigmaSinglePhaseFluid;
+```
+
+Enable the model in `constant/condensationProperties`:
+
+```text
+solveWallCondensation   yes;
+wallCondensationModel   diffusionLayer;
+condensingSpecie        H2O;
+maxCondWallMassFlux     100;
+
+saturationPressure
+{
+    type    ArdenBuck;
+}
+
+latentHeatModel
+{
+    type    polynomial;
+}
+```
+
+On each condensing wall, use:
+
+```text
+// 0/H2O
+type    saturatedSteam;
+value   uniform 0;
+
+// 0/U
+type    condensingWallVelocity;
+value   uniform (0 0 0);
+
+// 0/T, for an external-temperature wall balance
+type                externalCondensationTemperature;
+Ta                  constant 304;
+h                   uniform 4000;
+qcond               qcond;
+qcondRelaxation     0.2;
+relaxation          0.2;
+value               uniform 304;
+```
+
+The model writes `massTransferRate` and `qcond`. Their wall-patch values are
+the condensation mass flux `[kg/m2/s]` and latent heat flux `[W/m2]`
+respectively. `externalCondensationTemperature` adds the positive latent heat
+flux to the native OpenFOAM v14 external-temperature wall balance. The default
+latent-heat polynomial coefficients are the containmentFOAM values; they may
+be overridden with `A`, `B`, `C` and `D` in `latentHeatModel`.
+
+The legacy containmentFOAM `DtWallFunction`, `velocityScale` and top-level
+`Sct` entries are not read by this v14 port. Equivalent diffusivity settings
+belong to the selected v14 thermophysical-transport model. This distinction
+must be accounted for when constructing a numerically matched validation case.
+
 ## Build
 
 Source OpenFOAM Foundation v14 and run:
@@ -92,7 +167,8 @@ Source OpenFOAM Foundation v14 and run:
 ```
 
 The build script first runs `Allclean`, then builds the condensation library,
-the fluid solver module, and the solid solver module into `$FOAM_USER_LIBBIN`.
+the single-phase condensation library, both fluid solver modules, and the
+solid solver module into `$FOAM_USER_LIBBIN`.
 
 To clean the project, run:
 
@@ -137,3 +213,14 @@ location. It does not modify simulation results in either source case. Set
 
 The reference environment and the remaining long-run validation requirements
 are recorded in [`tests/BASELINE_MANIFEST.md`](tests/BASELINE_MANIFEST.md).
+
+The single-phase baseline and active-condensation smoke test is run with:
+
+```sh
+./tests/run_single_phase_smoke.sh
+```
+
+It compares the no-condensation result against native `multicomponentFluid`
+and then exercises `diffusionLayer`, `saturatedSteam`,
+`condensingWallVelocity`, and `externalCondensationTemperature` for one time
+step on an isolated temporary case.
