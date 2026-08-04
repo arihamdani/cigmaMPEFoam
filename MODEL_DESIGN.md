@@ -192,6 +192,20 @@ The same `mDotWall` must be used by the velocity boundary condition and the
 containmentFOAM coefficients. Saturation pressure is selected through the
 native v14 `saturationPressureModel` interface.
 
+For every solved non-condensable specie on the same wall, zero net species
+mass flux requires the diffusion gradient
+
+```text
+snGrad(Ync) = uSuction Ync/DEff,nc,
+```
+
+where `DEff,nc` is the kinematic effective mass diffusivity obtained by
+dividing the native v14 dynamic coefficient by the wall density. The
+`nonCondensableMassFraction` boundary condition enforces this relation. It is
+required when the gas contains an additional solved non-condensable specie,
+such as helium in CCSJ01; a plain zero-gradient condition does not cancel the
+advective suction flux.
+
 For an external-temperature thermal boundary, the
 `externalCondensationTemperature` condition adds the positive `qCond` field
 to the native OpenFOAM v14 wall heat balance. Both diagnostic fields retain

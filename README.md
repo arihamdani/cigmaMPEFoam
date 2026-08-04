@@ -94,8 +94,9 @@ types, because duplicate runtime-selection registrations are unnecessary.
 ## Single-phase diffusion-layer wall condensation
 
 `src/singlePhaseCondensation` adapts the containmentFOAM single-phase
-diffusion-layer formulation and its `saturatedSteam` and
-`condensingWallVelocity` boundary conditions to OpenFOAM Foundation v14.
+diffusion-layer formulation and its `saturatedSteam`,
+`nonCondensableMassFraction`, and `condensingWallVelocity` boundary
+conditions to OpenFOAM Foundation v14.
 The implementation uses the native v14 effective species flux returned by the
 selected multicomponent thermophysical-transport model. This includes the
 molecular and turbulent contributions configured by that model.
@@ -132,6 +133,10 @@ On each condensing wall, use:
 type    saturatedSteam;
 value   uniform 0;
 
+// 0/<solved non-condensable specie>, if more than one NCG is present
+type    nonCondensableMassFraction;
+value   uniform 0;
+
 // 0/U
 type    condensingWallVelocity;
 value   uniform (0 0 0);
@@ -152,6 +157,12 @@ respectively. `externalCondensationTemperature` adds the positive latent heat
 flux to the native OpenFOAM v14 external-temperature wall balance. The default
 latent-heat polynomial coefficients are the containmentFOAM values; they may
 be overridden with `A`, `B`, `C` and `D` in `latentHeatModel`.
+
+For mixtures with two or more non-condensable species,
+`nonCondensableMassFraction` balances the outward condensation-suction flux
+with the native v14 effective species diffusivity. Apply it to each solved
+non-condensable mass fraction on a condensing wall; the default specie remains
+the algebraic mass-fraction closure.
 
 The legacy containmentFOAM `DtWallFunction`, `velocityScale` and top-level
 `Sct` entries are not read by this v14 port. Equivalent diffusivity settings

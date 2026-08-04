@@ -134,6 +134,12 @@ public:
             return condSuctionVelocity_[patchi];
         }
 
+        tmp<scalarField> wallEffectiveMassDiffusivity
+        (
+            const volScalarField& Yi,
+            const label patchi
+        ) const;
+
         const volScalarField& massTransferRate() const
         {
             return massTransferRate_;

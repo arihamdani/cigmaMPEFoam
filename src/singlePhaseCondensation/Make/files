@@ -1,5 +1,6 @@
 cigmaDiffusionLayerCondensation.C
 cigmaSaturatedSteamFvPatchScalarField.C
+cigmaNonCondensableMassFractionFvPatchScalarField.C
 cigmaCondensingWallVelocityFvPatchVectorField.C
 cigmaExternalCondensationTemperatureFvPatchScalarField.C
 

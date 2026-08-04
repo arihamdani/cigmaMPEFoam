@@ -283,6 +283,19 @@ Foam::scalarField Foam::cigmaDiffusionLayerCondensation::latentHeat
 }
 
 
+Foam::tmp<Foam::scalarField>
+Foam::cigmaDiffusionLayerCondensation::wallEffectiveMassDiffusivity
+(
+    const volScalarField& Yi,
+    const label patchi
+) const
+{
+    return
+        thermophysicalTransport_.DEff(Yi, patchi)
+       /max(rho_.boundaryField()[patchi], scalar(SMALL));
+}
+
+
 void Foam::cigmaDiffusionLayerCondensation::predict()
 {
     if (!active_)
