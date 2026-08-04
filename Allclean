@@ -7,11 +7,13 @@ wclean libso "$project_dir/applications/solvers/solid/cigmaMPESolid"
 wclean libso "$project_dir/applications/solvers/fluid/cigmaMPEFluid"
 wclean libso "$project_dir/applications/solvers/fluid/cigmaSinglePhaseFluid"
 wclean libso "$project_dir/src/condensationModels"
+wclean libso "$project_dir/src/multiphaseMomentumTransportModels"
 wclean libso "$project_dir/src/singlePhaseCondensation"
 
 if [[ -n "${FOAM_USER_LIBBIN:-}" ]]; then
     for library in \
         libcigmaMPECondensationModels.so \
+        libcigmaMPEMomentumTransportModels.so \
         libcigmaSinglePhaseCondensationModels.so \
         libcigmaMPEFluidSolver.so \
         libcigmaSinglePhaseFluidSolver.so \

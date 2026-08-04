@@ -16,6 +16,7 @@ cigmaMPEFoam/
 │           └── cigmaMPESolid/
 ├── src/
 │   ├── condensationModels/
+│   ├── multiphaseMomentumTransportModels/
 │   └── singlePhaseCondensation/
 ├── Allwmake
 ├── Allclean
@@ -90,6 +91,32 @@ does not modify the baseline wall-condensation closure.
 The library is installed as `libcigmaMPECondensationModels.so`. A case using
 this library should not also load `libmultiphaseEulerFvModels.so` for these same
 types, because duplicate runtime-selection registrations are unnecessary.
+
+## Multiphase buoyancy-aware turbulence
+
+`src/multiphaseMomentumTransportModels` provides the
+`cigmaBuoyantKOmegaSST` RAS model for the `phaseCompressible` runtime-selection
+table used by `multiphaseEuler`. It is installed as the additive library
+`libcigmaMPEMomentumTransportModels.so` and does not replace the corresponding
+single-phase cigma momentum-transport library.
+
+Load it from `system/controlDict`:
+
+```text
+libs
+(
+    "libcigmaMPEMomentumTransportModels.so"
+);
+```
+
+For an HPC installation with active cigma jobs, build only this new library:
+
+```sh
+wmake libso /path/to/cigmaMPEFoam/src/multiphaseMomentumTransportModels
+```
+
+Do not run `Allwmake` in that situation because it intentionally starts with
+`Allclean` and rebuilds all project libraries.
 
 ## Single-phase diffusion-layer wall condensation
 
@@ -178,8 +205,9 @@ Source OpenFOAM Foundation v14 and run:
 ```
 
 The build script first runs `Allclean`, then builds the condensation library,
-the single-phase condensation library, both fluid solver modules, and the
-solid solver module into `$FOAM_USER_LIBBIN`.
+the multiphase momentum-transport library, the single-phase condensation
+library, both fluid solver modules, and the solid solver module into
+`$FOAM_USER_LIBBIN`.
 
 To clean the project, run:
 

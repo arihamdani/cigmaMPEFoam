@@ -13,6 +13,9 @@ project_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "Building cigmaMPEFoam condensation models"
 wmake libso "$project_dir/src/condensationModels"
 
+echo "Building cigmaMPEFoam multiphase momentum-transport models"
+wmake libso "$project_dir/src/multiphaseMomentumTransportModels"
+
 echo "Building cigma single-phase condensation models"
 wmake libso "$project_dir/src/singlePhaseCondensation"
 
