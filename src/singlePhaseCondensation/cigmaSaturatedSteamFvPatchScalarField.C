@@ -69,10 +69,10 @@ cigmaSaturatedSteamFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
+    // Mapping can use temporary internal fields during reconstruction, so the
+    // dictionary-only field-name validation must not be repeated here.
     mixedFvPatchScalarField(ptf, p, iF, mapper)
-{
-    checkType();
-}
+{}
 
 
 cigmaSaturatedSteamFvPatchScalarField::
@@ -83,9 +83,7 @@ cigmaSaturatedSteamFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf, iF)
-{
-    checkType();
-}
+{}
 
 
 void cigmaSaturatedSteamFvPatchScalarField::updateCoeffs()

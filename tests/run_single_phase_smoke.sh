@@ -90,8 +90,19 @@ foamRun -case "$condensation_case" \
 grep -q '^End$' "$condensation_case/log.foamRun.restart"
 test -f "$condensation_case/2e-05/H2O"
 
+cp "$project_dir/tests/singlePhase/decomposeParDict" \
+    "$condensation_case/system/decomposeParDict"
+decomposePar -case "$condensation_case" -time 2e-05 \
+    >"$condensation_case/log.decomposePar" 2>&1
+mv "$condensation_case/2e-05" "$condensation_case/2e-05.serial"
+reconstructPar -case "$condensation_case" -time 2e-05 \
+    >"$condensation_case/log.reconstructPar" 2>&1
+grep -q '^End$' "$condensation_case/log.reconstructPar"
+test -f "$condensation_case/2e-05/H2O"
+
 echo "PASS: no-condensation fields match the native multicomponentFluid module."
 echo "PASS: diffusionLayer and saturatedSteam completed an active one-step test."
 echo "PASS: qcond was coupled through externalCondensationTemperature."
 echo "PASS: the active condensation case restarted from its written checkpoint."
+echo "PASS: the active condensation checkpoint was reconstructed."
 echo "Test cases retained at: $test_root"
