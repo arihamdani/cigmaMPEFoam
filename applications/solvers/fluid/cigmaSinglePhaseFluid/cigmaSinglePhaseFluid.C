@@ -43,4 +43,27 @@ void Foam::solvers::cigmaSinglePhaseFluid::prePredictor()
     condensation_.predict();
 }
 
+
+void Foam::solvers::cigmaSinglePhaseFluid::postSolve()
+{
+    multicomponentFluid::postSolve();
+
+    if (condensation_.active())
+    {
+        // Finish every checkpoint with evaluated solved-species boundaries.
+        // This also resets their update state consistently for continuous and
+        // restarted execution.
+        forAll(Y_, i)
+        {
+            if (thermo_.solveSpecie(i))
+            {
+                Y_[i].correctBoundaryConditions();
+            }
+        }
+
+        // Rebuild only the algebraic default specie before runTime.write().
+        thermo_.normaliseY();
+    }
+}
+
 // ************************************************************************* //

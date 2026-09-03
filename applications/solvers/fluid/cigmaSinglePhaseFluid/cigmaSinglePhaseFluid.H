@@ -59,6 +59,9 @@ public:
     //- Update the wall-condensation flux before solving the flow equations
     virtual void prePredictor();
 
+    //- Synchronise the algebraic default specie before writing a checkpoint
+    virtual void postSolve();
+
     //- Disallow assignment
     void operator=(const cigmaSinglePhaseFluid&) = delete;
 };

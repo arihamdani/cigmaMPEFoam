@@ -56,7 +56,20 @@ cigmaSaturatedSteamFvPatchScalarField
     }
     refGrad() = Zero;
     valueFraction() = Zero;
-    fvPatchScalarField::operator=(patchInternalField());
+
+    if
+    (
+        dict.found("value")
+     && p.boundaryMesh().mesh().time().name() != "0"
+    )
+    {
+        // Preserve the checkpoint value until the first coefficient update.
+        fvPatchScalarField::operator=(refValue());
+    }
+    else
+    {
+        fvPatchScalarField::operator=(patchInternalField());
+    }
 }
 
 

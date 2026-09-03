@@ -191,7 +191,9 @@ For mixtures with two or more non-condensable species,
 `nonCondensableMassFraction` balances the outward condensation-suction flux
 with the native v14 effective species diffusivity. Apply it to each solved
 non-condensable mass fraction on a condensing wall; the default specie remains
-the algebraic mass-fraction closure.
+the algebraic mass-fraction closure. Its condensing-wall boundary condition
+must be `calculated`, allowing `normaliseY()` to maintain
+`Ydefault = 1 - sum(Ysolved)` at the wall and in restart checkpoints.
 
 The legacy containmentFOAM `DtWallFunction`, `velocityScale` and top-level
 `Sct` entries are not read by this v14 port. Equivalent diffusivity settings
@@ -201,10 +203,14 @@ must be accounted for when constructing a numerically matched validation case.
 ### Restarting single-phase condensation
 
 The condensing specie is kept active so that `H2O` is written at every new
-checkpoint. A checkpoint may nevertheless contain either no active `H2O`
-(older builds) or a default-specie `AIR` field that is inconsistent with the
-wall values of `H2O` and `HE`. Either condition can fail the thermo
-mass-fraction check during restart.
+checkpoint. Before each write, solved-species wall conditions are finalised and
+the algebraic default specie is rebuilt, so a new simulation started from time
+zero can restart directly without a repair step. This operation does not alter
+the solved internal fields of `H2O` or `HE`.
+
+Checkpoints created by older builds may contain either no active `H2O` or a
+default-specie `AIR` field that is inconsistent with the wall values of `H2O`
+and `HE`. The repair utility below is only for these legacy checkpoints.
 
 Build only the required components while other jobs are active:
 
