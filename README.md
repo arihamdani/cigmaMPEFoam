@@ -198,6 +198,13 @@ must be accounted for when constructing a numerically matched validation case.
 
 ## Build
 
+`main` is the single supported integration branch. Update it before building:
+
+```sh
+git switch main
+git pull --ff-only origin main
+```
+
 Source OpenFOAM Foundation v14 and run:
 
 ```sh
