@@ -8,12 +8,14 @@ conjugate heat-transfer simulations with multiphase wall condensation.
 ```text
 cigmaMPEFoam/
 ├── applications/
-│   └── solvers/
-│       ├── fluid/
-│       │   ├── cigmaMPEFluid/
-│       │   └── cigmaSinglePhaseFluid/
-│       └── solid/
-│           └── cigmaMPESolid/
+│   ├── solvers/
+│   │   ├── fluid/
+│   │   │   ├── cigmaMPEFluid/
+│   │   │   └── cigmaSinglePhaseFluid/
+│   │   └── solid/
+│   │       └── cigmaMPESolid/
+│   └── utilities/
+│       └── cigmaRepairSinglePhaseCheckpoint/
 ├── src/
 │   ├── condensationModels/
 │   ├── multiphaseMomentumTransportModels/
@@ -196,6 +198,31 @@ The legacy containmentFOAM `DtWallFunction`, `velocityScale` and top-level
 belong to the selected v14 thermophysical-transport model. This distinction
 must be accounted for when constructing a numerically matched validation case.
 
+### Restarting single-phase condensation
+
+The condensing specie is kept active so that `H2O` is written at every new
+checkpoint. A checkpoint produced by an older build may contain `H2O_0` but no
+`H2O`, causing the thermo mass-fraction check to fail during restart.
+
+Build only the required components while other jobs are active:
+
+```sh
+wmake libso src/singlePhaseCondensation
+wmake applications/utilities/cigmaRepairSinglePhaseCheckpoint
+```
+
+Repair a decomposed checkpoint before restarting it:
+
+```sh
+mpirun -np 16 cigmaRepairSinglePhaseCheckpoint \
+    -case /path/to/case -parallel -region fluid -time 2000
+```
+
+For a serial checkpoint, omit `mpirun` and `-parallel`. The utility requires
+the original `0/fluid/H2O` boundary-condition template, refuses to overwrite an
+existing `H2O`, and preserves the old default-specie field as
+`AIR_beforeCheckpointRepair`.
+
 ## Build
 
 `main` is the single supported integration branch. Update it before building:
@@ -213,8 +240,8 @@ Source OpenFOAM Foundation v14 and run:
 
 The build script first runs `Allclean`, then builds the condensation library,
 the multiphase momentum-transport library, the single-phase condensation
-library, both fluid solver modules, and the solid solver module into
-`$FOAM_USER_LIBBIN`.
+library, both fluid solver modules, the solid solver module, and the checkpoint
+repair utility into the user OpenFOAM platform directories.
 
 To clean the project, run:
 

@@ -78,9 +78,20 @@ grep -q 'Updating single-phase diffusion-layer wall condensation' \
     "$condensation_case/log.foamRun"
 test -f "$condensation_case/1e-05/massTransferRate"
 test -f "$condensation_case/1e-05/qcond"
+test -f "$condensation_case/1e-05/H2O"
 grep -q '^-' "$condensation_case/1e-05/massTransferRate"
+
+foamDictionary "$condensation_case/system/controlDict" \
+    -entry startFrom -set latestTime >/dev/null
+foamDictionary "$condensation_case/system/controlDict" \
+    -entry endTime -set 2e-5 >/dev/null
+foamRun -case "$condensation_case" \
+    >"$condensation_case/log.foamRun.restart" 2>&1
+grep -q '^End$' "$condensation_case/log.foamRun.restart"
+test -f "$condensation_case/2e-05/H2O"
 
 echo "PASS: no-condensation fields match the native multicomponentFluid module."
 echo "PASS: diffusionLayer and saturatedSteam completed an active one-step test."
 echo "PASS: qcond was coupled through externalCondensationTemperature."
+echo "PASS: the active condensation case restarted from its written checkpoint."
 echo "Test cases retained at: $test_root"

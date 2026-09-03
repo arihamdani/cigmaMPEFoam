@@ -3,6 +3,7 @@ set -euo pipefail
 
 project_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+wclean "$project_dir/applications/utilities/cigmaRepairSinglePhaseCheckpoint"
 wclean libso "$project_dir/applications/solvers/solid/cigmaMPESolid"
 wclean libso "$project_dir/applications/solvers/fluid/cigmaMPEFluid"
 wclean libso "$project_dir/applications/solvers/fluid/cigmaSinglePhaseFluid"

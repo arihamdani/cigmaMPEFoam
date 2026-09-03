@@ -28,4 +28,7 @@ wmake libso "$project_dir/applications/solvers/fluid/cigmaSinglePhaseFluid"
 echo "Building cigmaMPESolid"
 wmake libso "$project_dir/applications/solvers/solid/cigmaMPESolid"
 
+echo "Building single-phase checkpoint repair utility"
+wmake "$project_dir/applications/utilities/cigmaRepairSinglePhaseCheckpoint"
+
 echo "Built cigmaMPEFoam for OpenFOAM-${WM_PROJECT_VERSION}"

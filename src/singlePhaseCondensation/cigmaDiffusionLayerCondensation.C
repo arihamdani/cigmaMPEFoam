@@ -259,6 +259,10 @@ Foam::cigmaDiffusionLayerCondensation::cigmaDiffusionLayerCondensation
 
     validate();
 
+    // Condensation requires this specie to be solved and written at every
+    // checkpoint, including when a chemistry model marked it inactive.
+    thermo_.setSpecieActive(condensingSpeciei_);
+
     Info<< "Single-phase wall condensation is ON" << nl
         << "    wallCondensationModel = diffusionLayer" << nl
         << "    condensingSpecie = " << condensingSpecie_ << nl
