@@ -10,7 +10,7 @@ the case owner before Milestone 0 is declared fully closed.
 
 ```text
 Project baseline commit: e340ee0313410a7739203ae862435be3277f1839
-Project development branch: development/condensation-model
+Project integration branch: main
 OpenFOAM version: Foundation v14
 OpenFOAM commit: 0db507470b
 OpenFOAM build: 14-0db507470b5e
