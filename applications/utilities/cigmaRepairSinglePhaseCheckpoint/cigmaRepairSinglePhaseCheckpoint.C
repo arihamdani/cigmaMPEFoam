@@ -32,35 +32,33 @@ int main(int argc, char* argv[])
         IOobject::NO_READ
     );
 
-    if (existingH2O.headerOk())
+    const bool hasH2O = existingH2O.headerOk();
+
+    typeIOobject<volScalarField> existingBackup
+    {
+        "AIR_beforeCheckpointRepair",
+        timeName,
+        mesh,
+        IOobject::NO_READ
+    };
+
+    if (existingBackup.headerOk())
     {
         FatalErrorInFunction
-            << "H2O already exists at time " << timeName
-            << ". Refusing to overwrite it." << exit(FatalError);
+            << "AIR_beforeCheckpointRepair already exists at time "
+            << timeName << ". Refusing to repair the checkpoint twice."
+            << exit(FatalError);
     }
-
-    volScalarField H2O0
-    (
-        IOobject
-        (
-            "H2O_0",
-            timeName,
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh
-    );
 
     volScalarField H2O
     (
         IOobject
         (
             "H2O",
-            "0",
+            hasH2O ? timeName : word("0"),
             mesh,
             IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
+            hasH2O ? IOobject::NO_WRITE : IOobject::AUTO_WRITE
         ),
         mesh
     );
@@ -91,22 +89,37 @@ int main(int argc, char* argv[])
         mesh
     );
 
-    H2O.primitiveFieldRef() = H2O0.primitiveField();
-    forAll(H2O.boundaryField(), patchi)
+    if (!hasH2O)
     {
-        if (H2O.boundaryField()[patchi].type() == "saturatedSteam")
+        volScalarField H2O0
         {
-            // The thermo validates the species sum before saturatedSteam can
-            // update.  Match the value reconstructed by its read constructor.
-            H2O.boundaryFieldRef()[patchi] ==
-                H2O.boundaryField()[patchi].patchInternalField();
-        }
-        else
+            IOobject
+            (
+                "H2O_0",
+                timeName,
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh
+        };
+
+        H2O.primitiveFieldRef() = H2O0.primitiveField();
+        forAll(H2O.boundaryField(), patchi)
         {
-            H2O.boundaryFieldRef()[patchi] == H2O0.boundaryField()[patchi];
+            if (H2O.boundaryField()[patchi].type() == "saturatedSteam")
+            {
+                // Match the value reconstructed by the time-zero template.
+                H2O.boundaryFieldRef()[patchi] ==
+                    H2O.boundaryField()[patchi].patchInternalField();
+            }
+            else
+            {
+                H2O.boundaryFieldRef()[patchi] == H2O0.boundaryField()[patchi];
+            }
         }
+        H2O.instance() = timeName;
     }
-    H2O.instance() = timeName;
 
     // Reconstruct the wall values written as fixedGradient.  These values are
     // recomputed when the solver reads the checkpoint and must therefore be
@@ -126,7 +139,7 @@ int main(int argc, char* argv[])
     if (minActive < -small || maxActive > 1 + small)
     {
         FatalErrorInFunction
-            << "H2O_0 + HE is outside [0, 1]: min=" << minActive
+            << "H2O + HE is outside [0, 1]: min=" << minActive
             << ", max=" << maxActive << exit(FatalError);
     }
 
@@ -152,10 +165,15 @@ int main(int argc, char* argv[])
         << ", max=" << max(repairedSum).value() << nl << endl;
 
     AIRBackup.write();
-    H2O.write();
+    if (!hasH2O)
+    {
+        H2O.write();
+    }
     AIR.write();
 
-    Info<< "Wrote H2O and AIR at time " << timeName << nl
+    Info<< (hasH2O ? "Preserved existing H2O and wrote AIR at time "
+                   : "Wrote recovered H2O and AIR at time ")
+        << timeName << nl
         << "Preserved AIR as AIR_beforeCheckpointRepair" << nl
         << "End" << endl;
 

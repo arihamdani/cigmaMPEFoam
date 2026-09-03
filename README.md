@@ -201,8 +201,10 @@ must be accounted for when constructing a numerically matched validation case.
 ### Restarting single-phase condensation
 
 The condensing specie is kept active so that `H2O` is written at every new
-checkpoint. A checkpoint produced by an older build may contain `H2O_0` but no
-`H2O`, causing the thermo mass-fraction check to fail during restart.
+checkpoint. A checkpoint may nevertheless contain either no active `H2O`
+(older builds) or a default-specie `AIR` field that is inconsistent with the
+wall values of `H2O` and `HE`. Either condition can fail the thermo
+mass-fraction check during restart.
 
 Build only the required components while other jobs are active:
 
@@ -218,10 +220,12 @@ mpirun -np 16 cigmaRepairSinglePhaseCheckpoint \
     -case /path/to/case -parallel -region fluid -time 2000
 ```
 
-For a serial checkpoint, omit `mpirun` and `-parallel`. The utility requires
-the original `0/fluid/H2O` boundary-condition template, refuses to overwrite an
-existing `H2O`, and preserves the old default-specie field as
-`AIR_beforeCheckpointRepair`.
+For a serial checkpoint, omit `mpirun` and `-parallel`. If `H2O` exists, the
+utility preserves it and only rebuilds `AIR`. If `H2O` is missing, the original
+`0/fluid/H2O` boundary-condition template and `H2O_0` are used to recover it.
+In both modes, the old default-specie field is preserved as
+`AIR_beforeCheckpointRepair`, and a second repair of the same checkpoint is
+refused.
 
 ## Build
 
