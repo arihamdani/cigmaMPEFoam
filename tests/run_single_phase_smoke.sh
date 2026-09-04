@@ -104,6 +104,9 @@ python3 "$project_dir/tests/compare_internal_scalar_fields.py" \
     "$condensation_case/2e-05" \
     H2O air
 
+python3 "$project_dir/tests/check_internal_mass_fraction_sum.py" \
+    "$condensation_case" 2e-05 H2O air --region .
+
 cp "$project_dir/tests/singlePhase/decomposeParDict" \
     "$condensation_case/system/decomposeParDict"
 decomposePar -case "$condensation_case" -time 2e-05 \
@@ -119,5 +122,6 @@ echo "PASS: diffusionLayer and saturatedSteam completed an active one-step test.
 echo "PASS: qcond was coupled through externalCondensationTemperature."
 echo "PASS: the active condensation case restarted from its written checkpoint."
 echo "PASS: continuous and restarted species agree within restart tolerance."
+echo "PASS: the restarted checkpoint has a closed mass-fraction sum."
 echo "PASS: the active condensation checkpoint was reconstructed."
 echo "Test cases retained at: $test_root"

@@ -37,10 +37,74 @@ Foam::solvers::cigmaSinglePhaseFluid::~cigmaSinglePhaseFluid()
 {}
 
 
+void Foam::solvers::cigmaSinglePhaseFluid::boundAndNormaliseMassFractions
+(
+    const bool reportCorrection
+)
+{
+    tmp<volScalarField> tSolvedYSum
+    (
+        volScalarField::New
+        (
+            "cigmaSolvedYSum",
+            mesh_,
+            dimensionedScalar(dimless, 0)
+        )
+    );
+    volScalarField& solvedYSum = tSolvedYSum.ref();
+
+    forAll(Y_, i)
+    {
+        if (thermo_.solveSpecie(i))
+        {
+            Y_[i].max(scalar(0));
+            solvedYSum += Y_[i];
+        }
+    }
+
+    const dimensionedScalar maxSolvedY(max(solvedYSum));
+
+    // OpenFOAM normaliseY() clips the default specie to zero but does not
+    // reduce solved species whose sum exceeds one.  Scale only those cells,
+    // preserving the relative composition of all solved species.
+    if (maxSolvedY.value() > 1)
+    {
+        const tmp<volScalarField> tScale(max(solvedYSum, scalar(1)));
+
+        forAll(Y_, i)
+        {
+            if (thermo_.solveSpecie(i))
+            {
+                Y_[i] /= tScale();
+            }
+        }
+    }
+
+    thermo_.normaliseY();
+
+    if (reportCorrection && maxSolvedY.value() > 1 + small)
+    {
+        Info<< "Normalised solved-species maximum sum from "
+            << maxSolvedY.value() << " to 1 before checkpoint write" << endl;
+    }
+}
+
+
 void Foam::solvers::cigmaSinglePhaseFluid::prePredictor()
 {
     multicomponentFluid::prePredictor();
     condensation_.predict();
+}
+
+
+void Foam::solvers::cigmaSinglePhaseFluid::thermophysicalPredictor()
+{
+    multicomponentFluid::thermophysicalPredictor();
+
+    if (condensation_.active())
+    {
+        boundAndNormaliseMassFractions(false);
+    }
 }
 
 
@@ -61,8 +125,8 @@ void Foam::solvers::cigmaSinglePhaseFluid::postSolve()
             }
         }
 
-        // Rebuild only the algebraic default specie before runTime.write().
-        thermo_.normaliseY();
+        // Enforce the same bounded closure in continuous and restarted runs.
+        boundAndNormaliseMassFractions(runTime.writeTime());
     }
 }
 

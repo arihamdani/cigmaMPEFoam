@@ -203,10 +203,21 @@ must be accounted for when constructing a numerically matched validation case.
 ### Restarting single-phase condensation
 
 The condensing specie is kept active so that `H2O` is written at every new
-checkpoint. Before each write, solved-species wall conditions are finalised and
-the algebraic default specie is rebuilt, so a new simulation started from time
-zero can restart directly without a repair step. This operation does not alter
-the solved internal fields of `H2O` or `HE`.
+checkpoint. After each thermophysical solution, negative solved-species values
+are bounded to zero. In cells where the sum of solved species exceeds one, the
+solved species are scaled proportionally to preserve their composition ratio;
+the algebraic default specie is then rebuilt. The same closure is applied after
+the wall boundary conditions are finalised and before every checkpoint write.
+Consequently, continuous and restarted runs use the same bounded state and a
+new simulation started from time zero can restart directly without a repair
+step.
+
+Audit a serial or decomposed checkpoint without changing it:
+
+```sh
+python3 tests/check_internal_mass_fraction_sum.py \
+    /path/to/case 2000 H2O HE AIR --region fluid
+```
 
 Checkpoints created by older builds may contain either no active `H2O` or a
 default-specie `AIR` field that is inconsistent with the wall values of `H2O`

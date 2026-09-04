@@ -43,6 +43,12 @@ class cigmaSinglePhaseFluid
         cigmaDiffusionLayerCondensation condensation_;
 
 
+    // Private member functions
+
+        //- Bound solved species and rebuild the algebraic default specie
+        void boundAndNormaliseMassFractions(const bool reportCorrection);
+
+
 public:
 
     TypeName("cigmaSinglePhaseFluid");
@@ -59,7 +65,10 @@ public:
     //- Update the wall-condensation flux before solving the flow equations
     virtual void prePredictor();
 
-    //- Synchronise the algebraic default specie before writing a checkpoint
+    //- Solve thermophysics and enforce a conservative mass-fraction closure
+    virtual void thermophysicalPredictor();
+
+    //- Finalise species boundaries and checkpoint mass-fraction closure
     virtual void postSolve();
 
     //- Disallow assignment
