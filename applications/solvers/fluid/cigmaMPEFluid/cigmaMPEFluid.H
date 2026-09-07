@@ -27,7 +27,8 @@ Class
 Description
     Runtime-selectable cigmaMPEFoam fluid module derived from the OpenFOAM
     Foundation v14 multiphaseEuler solver. It optionally applies per-phase
-    Courant-number limits in addition to the standard global limit.
+    Courant-number limits in addition to the standard global limit and can use
+    single-phase-style multivariate convection for one multicomponent phase.
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,6 +46,24 @@ class cigmaMPEFluid
 :
     public multiphaseEuler
 {
+    // Private data
+
+        //- Use coupled multivariate convection for species and enthalpy
+        Switch singlePhaseSpeciesConvection_;
+
+        //- Multicomponent phase using single-phase-style species convection
+        word singlePhaseSpeciesPhase_;
+
+
+    // Private member functions
+
+        //- Solve species with multivariate convection for the selected phase
+        void compositionPredictor();
+
+        //- Solve phase energy equations with optional multivariate convection
+        void energyPredictor();
+
+
 public:
 
     TypeName("cigmaMPEFluid");
@@ -60,6 +79,9 @@ public:
 
     //- Return the maximum time-step including optional per-phase Co limits
     virtual scalar maxDeltaT() const;
+
+    //- Solve composition and energy with optional species-convection parity
+    virtual void thermophysicalPredictor();
 
     //- Disallow assignment
     void operator=(const cigmaMPEFluid&) = delete;

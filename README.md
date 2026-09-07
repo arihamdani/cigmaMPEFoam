@@ -67,6 +67,38 @@ The applied time-step is the minimum allowed by the global limit, all listed
 moving-phase limits, `maxDeltaT`, function objects, and fvModels. Cases that
 do not define `phaseMaxCo` retain the standard OpenFOAM v14 behaviour.
 
+## Single-phase-style species convection
+
+`cigmaMPEFluid` can optionally use the shared multivariate convection limiter
+from `multicomponentFluid` for all species in one multicomponent phase. Enable
+it in the `PIMPLE` dictionary in `system/<region>/fvSolution`:
+
+```text
+singlePhaseSpeciesConvection yes;
+singlePhaseSpeciesPhase      gas;
+```
+
+The corresponding entry in `system/<region>/fvSchemes` must contain every
+species field and the phase enthalpy field:
+
+```text
+div(alphaRhoPhi.gas,Yi_h)    Gauss multivariateSelection
+{
+    H2O.gas                  limitedLinear 01 1;
+    HE.gas                   limitedLinear 01 1;
+    AIR.gas                  limitedLinear 01 1;
+    h.gas                    limitedLinear 1;
+};
+```
+
+This option changes only the convection discretisation of the selected gas
+species and enthalpy fields. It retains the multiphase accumulation and flux
+weighting by `alpha.gas`, molecular and turbulent diffusion, phase transfer,
+condensation sources, and all liquid equations. Therefore, it provides a
+controlled convection-discretisation parity test without violating phase mass
+conservation. The default is `no`, which retains the native OpenFOAM v14
+multiphaseEuler equations.
+
 ## Condensation models
 
 `src/condensationModels` contains the minimum OpenFOAM v14 source set required
